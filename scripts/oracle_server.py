@@ -3,7 +3,10 @@
   oracle - answers with the programmatic ground truth; every rollout should score 1.0
            (smoke test of the wiring vf-eval -> harness -> rewards).
   naive  - files the ledger as recorded: sums every sale line and the recorded tax, accrues
-           no use tax, flags no faults (an un-audited bookkeeper's return).
+           no use tax, flags no faults (an un-audited bookkeeper's return). On gpu-rightsizing-v1
+           it keeps every pod at its full request (today's over-reserved fleet): nothing reclaimed.
+
+The environment is detected from the prompt, so one server covers both environments.
 
 Run: python scripts/oracle_server.py <port> [oracle|naive]
 """
@@ -16,6 +19,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from decimal import Decimal
 
+from gpu_rightsizing_v1.fleet import fleet_from_prompt, solve
 from us_sut_reconciliation_v1.ledger import EXEMPT_CATEGORIES, Ledger, Row, reconcile
 
 POLICY = sys.argv[2] if len(sys.argv) > 2 else "oracle"
@@ -44,12 +48,26 @@ def ledger_from_prompt(text: str) -> Ledger:
     return Ledger(seed=0, year=year, quarter=quarter, business_zip=business_zip, rows=rows)
 
 
+def gpu_naive(text: str) -> dict:
+    fleet = fleet_from_prompt(text)
+    reserved = sum((Decimal(p.gpu_request) * p.hours for p in fleet.pods), Decimal("0"))
+    return {"allocations": {p.pod_id: p.gpu_request for p in fleet.pods}, "vetoed": [],
+            "reserved_gpu_hours": f"{reserved:.2f}", "reclaimed_gpu_hours": "0.00", "reclaim_pct": "0.00",
+            "annual_savings_usd": "0.00"}
+
+
+def respond(text: str) -> dict:
+    if "Pods (CSV):" in text:
+        return gpu_naive(text) if POLICY == "naive" else solve(fleet_from_prompt(text))
+    return (naive if POLICY == "naive" else reconcile)(ledger_from_prompt(text))
+
+
 class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         user = next(m for m in body["messages"] if m["role"] == "user")
         content = user["content"] if isinstance(user["content"], str) else user["content"][0]["text"]
-        answer = f"<answer>\n{json.dumps((naive if POLICY == "naive" else reconcile)(ledger_from_prompt(content)))}\n</answer>"
+        answer = f"<answer>\n{json.dumps(respond(content))}\n</answer>"
         created, model = int(time.time()), body.get("model")
         if not body.get("stream"):
             out = {

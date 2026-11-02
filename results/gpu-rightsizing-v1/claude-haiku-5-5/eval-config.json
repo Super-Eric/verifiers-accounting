@@ -1,0 +1,114 @@
+{
+  "env": {
+    "taskset": {
+      "task": {
+        "judges": [],
+        "stops": {},
+        "metrics": {},
+        "rewards": {}
+      },
+      "system_prompt": null,
+      "id": "gpu-rightsizing-v1",
+      "num_tasks": 50,
+      "num_pods": 24,
+      "seed": 20261102
+    },
+    "timeout": {
+      "episode": null,
+      "finalize": null
+    },
+    "retries": {
+      "max_retries": 0,
+      "rules": []
+    },
+    "max_concurrent_agents": 1,
+    "interception": {
+      "type": "elastic",
+      "multiplex": 32
+    },
+    "id": "",
+    "agent": {
+      "harness": {
+        "id": "null",
+        "env": {},
+        "forward_env": [],
+        "mcp_header_env": {},
+        "tool_timeout": 600.0,
+        "disabled_tools": null,
+        "skills": []
+      },
+      "runtime": {
+        "type": "subprocess"
+      },
+      "model": null,
+      "client": null,
+      "sampling": null,
+      "max_turns": null,
+      "max_input_tokens": null,
+      "max_output_tokens": null,
+      "max_total_tokens": null,
+      "timeout": {
+        "setup": null,
+        "rollout": null,
+        "finalize": null,
+        "scoring": null
+      },
+      "retries": {
+        "max_retries": 0,
+        "rules": []
+      },
+      "network_notice": true
+    }
+  },
+  "run": {
+    "name": "gpu-rightsizing-v1--claude-haiku-5-5--null--61dbb0dd",
+    "dir": "gpu-rightsizing-v1--claude-haiku-5-5--null--61dbb0dd",
+    "attach": null
+  },
+  "model": "claude-haiku-5-5",
+  "client": {
+    "base_url": "https://api.anthropic.com/v1",
+    "api_key_var": "ANTHROPIC_API_KEY",
+    "headers": {},
+    "headers_from_env": {},
+    "timeout": {
+      "connect": 30.0,
+      "read": null,
+      "write": null,
+      "pool": null
+    },
+    "type": "eval"
+  },
+  "sampling": {
+    "temperature": null,
+    "top_p": null,
+    "reasoning_effort": null,
+    "max_tokens": 32000
+  },
+  "select": {
+    "include": {
+      "idx": [],
+      "ids": [],
+      "keys": [],
+      "names": []
+    },
+    "exclude": {
+      "idx": [],
+      "ids": [],
+      "keys": [],
+      "names": []
+    },
+    "shuffle": false,
+    "seed": 0,
+    "skip": 0,
+    "limit": 30
+  },
+  "num_rollouts": 3,
+  "max_concurrent": 8,
+  "verbose": false,
+  "rich": {
+    "show_logs": false
+  },
+  "push": false,
+  "output_dir": "outputs"
+}
