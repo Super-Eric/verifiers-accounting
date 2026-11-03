@@ -1,4 +1,4 @@
-# verifiers-accounting
+# verifiers-environments
 
 Accounting, tax-compliance, GPU-capacity and weight-space-programming RL environments for Prime Intellect's
 [`verifiers`](https://github.com/PrimeIntellect-ai/verifiers) (v1 stack).
