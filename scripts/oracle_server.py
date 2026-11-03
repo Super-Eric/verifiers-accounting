@@ -4,7 +4,8 @@
            (smoke test of the wiring vf-eval -> harness -> rewards).
   naive  - files the ledger as recorded: sums every sale line and the recorded tax, accrues
            no use tax, flags no faults (an un-audited bookkeeper's return). On gpu-rightsizing-v1
-           it keeps every pod at its full request (today's over-reserved fleet): nothing reclaimed.
+           it keeps every pod at its full request (today's over-reserved fleet): nothing reclaimed. On weight-space-v1
+           it guesses "majority" and lists every unit (read), makes no edit (fix) and writes an all-zero net (write).
 
 The environment is detected from the prompt, so one server covers both environments.
 
@@ -20,6 +21,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from decimal import Decimal
 
 from gpu_rightsizing_v1.fleet import fleet_from_prompt, solve
+from weight_space_v1.nets import FUNCTIONS, Net, functional_units, reference_net
+from weight_space_v1.taskset import WeightSpaceConfig, WeightSpaceTaskset
 from us_sut_reconciliation_v1.ledger import EXEMPT_CATEGORIES, Ledger, Row, reconcile
 
 POLICY = sys.argv[2] if len(sys.argv) > 2 else "oracle"
@@ -56,7 +59,36 @@ def gpu_naive(text: str) -> dict:
             "annual_savings_usd": "0.00"}
 
 
+WSP_TASKS = {}
+
+
+def wsp(text: str) -> dict:
+    """weight-space-v1: read answers come from the shown weights; fix restores the corrupted parameter."""
+    if not WSP_TASKS:
+        WSP_TASKS.update((t.data.prompt, t.data) for t in WeightSpaceTaskset(WeightSpaceConfig(num_tasks=300)).load())
+    data = WSP_TASKS[text]
+    if POLICY == "naive":
+        if data.mode == "read":
+            return {"function": "majority", "functional_units": list(range(len(data.net["b1"])))}
+        if data.mode == "fix":
+            return {"edits": []}
+        return {"W1": [[0] * 5], "b1": [0], "v": [0], "c": -1}
+    if data.mode == "read":
+        net = Net.from_json(data.net)
+        table = net.truth_table()
+        name = next(n for n in FUNCTIONS if reference_net(n).truth_table() == table)
+        return {"function": name, "functional_units": functional_units(net)}
+    if data.mode == "fix":
+        loc = data.expected["corruption"]
+        return {"edits": [{**{k: loc[k] for k in ("param", "row", "col") if k in loc}, "value": loc["original"]}]}
+    net = reference_net(data.function)
+    return {"W1": [[float(w) for w in r] for r in net.W1], "b1": [float(b) for b in net.b1],
+            "v": [float(v) for v in net.v], "c": float(net.c)}
+
+
 def respond(text: str) -> dict:
+    if text.startswith(("READ.", "FIX.", "WRITE.")):
+        return wsp(text)
     if "Pods (CSV):" in text:
         return gpu_naive(text) if POLICY == "naive" else solve(fleet_from_prompt(text))
     return (naive if POLICY == "naive" else reconcile)(ledger_from_prompt(text))
