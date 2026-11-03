@@ -38,3 +38,14 @@ def test_parse_oracle_roundtrip():
     parsed = parse_answer(f"work...\n<answer>\n```json\n{json.dumps(e)}\n```\n</answer>")
     assert to_cents(parsed["annual_savings_usd"]) == Decimal(e["annual_savings_usd"])
     assert parse_answer("no answer") is None
+
+
+def test_parse_takes_the_real_block():
+    e = solve(generate(3))
+    block = f"<answer>{json.dumps(e)}</answer>"
+    assert parse_answer(f"Now the <answer> block:\n{block}") == e  # a tag named in the reasoning
+    assert parse_answer(f"{block}\nI wrapped it in <answer></answer> as asked.") == e  # an empty pair after
+    assert parse_answer(f"<answer>{{}}</answer>\n{block}") == e  # the last block is still the one read
+    assert parse_answer(f"{block}\n<answer>{{}}</answer>") == {}
+    assert parse_answer("<answer>{\"allocations\": " + "1" * 5000 + "}</answer>") is None  # not a crash
+    assert parse_answer("<answer>" + "[" * 100000 + "]" * 100000 + "</answer>") is None

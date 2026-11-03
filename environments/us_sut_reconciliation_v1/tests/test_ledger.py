@@ -27,3 +27,13 @@ def test_parse_oracle_roundtrip():
     assert fault_pairs(parsed["faults"]) == fault_pairs(e["faults"])
     assert to_cents(parsed["net_remittance"]) == to_cents(e["net_remittance"])
     assert parse_answer("no answer") is None
+
+
+def test_parse_takes_the_real_block():
+    e = reconcile(generate(3))
+    block = f"<answer>{json.dumps(e)}</answer>"
+    assert parse_answer(f"The <answer> block:\n{block}") == e  # a tag named in the reasoning
+    assert parse_answer(f"{block}\nI wrapped it in <answer></answer> as asked.") == e  # an empty pair after
+    assert parse_answer(f"<answer>{{}}</answer>\n{block}") == e  # the last block is still the one read
+    assert parse_answer(f"{block}\n<answer>{{}}</answer>") == {}
+    assert parse_answer("<answer>{\"gross_sales\": " + "1" * 5000 + "}</answer>") is None  # not a crash
