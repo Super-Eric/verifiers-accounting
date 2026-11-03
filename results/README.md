@@ -92,6 +92,14 @@ match to the cent. `parsed` is the share of rollouts with a valid `<answer>{json
 - The Claude runs use default effort (Sonnet 5.5: `high`, Haiku 5.5: `medium`) with adaptive thinking. The thinking
   is not returned through the OpenAI-compatible endpoint, so the traces hold only the final answer.
 - The jurisdiction is an illustrative rulebook with stylized rates. It is not current statutory law.
+- **Grading changes since these runs (v0.1.1):**
+  - `exempt_sales` is now one of the graded return figures. It was asked for in the prompt but never compared.
+  - `parse_answer` now reads the last non-empty `<answer>` block, searching from the end. This fixes an `<answer>`
+    mentioned in the reasoning, or an empty pair after the answer, zeroing a correct reply.
+  - Neither change alters any reward above. No rollout missed only `exempt_sales`, and no rollout has a second or
+    empty `<answer>` tag.
+  - `fields_correct` re-scored on 6 figures: Haiku 0.883, Sonnet 0.989, naive 0.117 (was 0.862 / 0.987 / 0.113 on
+    5 figures).
 
 ## Reproduce
 

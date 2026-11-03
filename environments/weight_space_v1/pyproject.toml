@@ -1,6 +1,6 @@
 [project]
 name = "weight-space-v1"
-version = "0.1.0"
+version = "0.1.1"
 description = "Weight-space programming: read, repair and write the raw weights of small ReLU networks as text, checked exactly on all 32 inputs."
 requires-python = ">=3.11"
 dependencies = ["verifiers>=0.4.0"]

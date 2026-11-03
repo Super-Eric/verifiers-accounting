@@ -52,10 +52,10 @@ Model output: a final `<answer>` block holding JSON:
 
 | Reward | Weight | Definition |
 |---|---|---|
-| `return_correct` | 0.6 | 1.0 iff `gross_sales`, `taxable_sales`, `sales_tax_due`, `use_tax_due`, `net_remittance` all match to the cent |
+| `return_correct` | 0.6 | 1.0 iff `gross_sales`, `exempt_sales`, `taxable_sales`, `sales_tax_due`, `use_tax_due`, `net_remittance` all match to the cent |
 | `fault_audit` | 0.4 | Micro-F1 over `(transaction_id, fault_code)` pairs (1.0 when both sets are empty) |
 
-Metrics (unweighted): `answer_parsed`, `fields_correct` (fraction of the 5 figures), `fault_precision`, `fault_recall`.
+Metrics (unweighted): `answer_parsed`, `fields_correct` (fraction of the 6 figures), `fault_precision`, `fault_recall`.
 
 ## Config
 

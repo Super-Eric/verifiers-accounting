@@ -1,6 +1,6 @@
 [project]
 name = "us-sut-reconciliation-v1"
-version = "0.1.0"
+version = "0.1.1"
 description = "US state sales & use tax return reconciliation with injected bookkeeping faults (US analogue of au-bas-reconciliation-v1)."
 requires-python = ">=3.11"
 dependencies = ["verifiers>=0.4.0"]

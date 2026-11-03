@@ -107,6 +107,8 @@ It differs in four ways:
   example, one unit's removal left a logit margin of 0.00006. That run was discarded.
 - The env now requires every single-unit ablation to keep the logit at least 0.05 from zero. The results above are
   from that version.
+- v0.1.1 reads the last non-empty `<answer>` block, searching from the end (same fix as PR #1 for the other
+  envs). No rollout above has a second or empty `<answer>` tag, so no score changes.
 - Default effort. The thinking is not returned through the OpenAI-compatible endpoint, so the traces hold only the
   final answers.
 

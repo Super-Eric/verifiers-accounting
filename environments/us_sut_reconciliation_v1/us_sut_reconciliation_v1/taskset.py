@@ -6,7 +6,7 @@ import verifiers.v1 as vf
 
 from us_sut_reconciliation_v1.ledger import generate, reconcile, render_ledger, render_rulebook
 
-RETURN_FIELDS = ("gross_sales", "taxable_sales", "sales_tax_due", "use_tax_due", "net_remittance")
+RETURN_FIELDS = ("gross_sales", "exempt_sales", "taxable_sales", "sales_tax_due", "use_tax_due", "net_remittance")
 
 SYSTEM_PROMPT = """\
 You are a US state sales & use tax auditor. Reconcile the quarterly ledger against the rulebook, prepare the

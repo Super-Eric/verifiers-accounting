@@ -61,3 +61,14 @@ def test_scoring_helpers():
     assert lift(0.75, 0.75) == 0.0 and lift(1.0, 0.75) == 1.0
     assert parse_answer(f"...<answer>\n```json\n{json.dumps({'edits': []})}\n```\n</answer>") == {"edits": []}
     assert isinstance(Net.from_json(reference_net("one_hot").to_json()), Net)
+
+
+def test_parse_takes_the_real_block():
+    e = {"edits": [{"param": "v", "row": 1, "value": 0.5}]}
+    block = f"<answer>{json.dumps(e)}</answer>"
+    assert parse_answer(f"Now the <answer> block:\n{block}") == e  # a tag named in the reasoning
+    assert parse_answer(f"{block}\nI wrapped it in <answer></answer> as asked.") == e  # an empty pair after
+    assert parse_answer(f"<answer>{{}}</answer>\n{block}") == e  # the last block is still the one read
+    assert parse_answer(f"{block}\n<answer>{{}}</answer>") == {}
+    assert parse_answer("<answer>{\"c\": " + "1" * 5000 + "}</answer>") is None  # not a crash
+    assert parse_answer("<answer>" + "[" * 100000 + "]" * 100000 + "</answer>") is None

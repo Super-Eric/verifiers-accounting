@@ -18,15 +18,24 @@ each unit computes from its weights. Think as needed, then finish with exactly o
 
 
 def parse_answer(text: str) -> dict | None:
-    blocks = re.findall(r"<answer>(.*?)</answer>", text or "", re.DOTALL)
-    if not blocks:
-        return None
-    body = re.sub(r"^```(?:json)?\s*|\s*```$", "", blocks[-1].strip())
-    try:
-        parsed = json.loads(body)
-    except json.JSONDecodeError:
-        return None
-    return parsed if isinstance(parsed, dict) else None
+    # The last non-empty <answer> block, found from the end so that an opener mentioned
+    # in the reasoning ("Now the <answer> block:") cannot swallow the real block.
+    text = text or ""
+    start = len(text)
+    while (start := text.rfind("<answer>", 0, start)) >= 0:
+        close = text.find("</answer>", start + len("<answer>"))
+        if close < 0:
+            continue
+        body = text[start + len("<answer>"):close].strip()
+        body = re.sub(r"^```(?:json)?\s*|\s*```$", "", body)
+        if not body:
+            continue
+        try:
+            parsed = json.loads(body)
+        except (ValueError, RecursionError):  # JSONDecodeError, the int digit limit, deep nesting
+            return None
+        return parsed if isinstance(parsed, dict) else None
+    return None
 
 
 def unit_prf(predicted, gold: list[int]) -> tuple[float, float, float]:
