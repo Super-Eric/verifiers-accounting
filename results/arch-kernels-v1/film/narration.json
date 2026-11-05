@@ -1,1 +1,50 @@
-[[0.3, "x86 or Arm? Which chip runs your code faster?"], [4.7, "Claude writes fast C. Real AMD EPYC and NVIDIA Arm sandboxes build and time it."], [12.8, "Arm wins six of thirteen. On throughput, it's a tie."], [18.8, "x86 takes wide SIMD math, like matmul. Arm takes CRC, prime counting, and transpose."], [25.8, "On CRC-32, Claude reached for Arm's own CRC instruction. Two point three times faster."], [32.3, "Memory? Same bytes on both. Arm processes just start a little lighter."], [37.8, "Told the chip, Claude goes native. Only nine of thirty-nine x86 answers even compile on Arm."], [43.5, "arch-kernels. Open on Prime Intellect's Hub."]]
+[
+ {
+  "start": 0.3,
+  "scene_end": 4.4,
+  "text": "So... x86 or Arm? Which one actually runs your code faster?",
+  "voice": "Chris (ElevenLabs)"
+ },
+ {
+  "start": 4.7,
+  "scene_end": 12.6,
+  "text": "We had Claude write fast C for thirteen little kernels, then ran every answer on a real AMD EPYC and an NVIDIA Arm box.",
+  "voice": "Chris (ElevenLabs)"
+ },
+ {
+  "start": 12.8,
+  "scene_end": 18.5,
+  "text": "And honestly? It's basically a tie. Arm wins six out of thirteen.",
+  "voice": "Chris (ElevenLabs)"
+ },
+ {
+  "start": 18.8,
+  "scene_end": 25.5,
+  "text": "x86 crushes the wide SIMD stuff, like matmul. Arm grabs CRC, prime counting, and transpose.",
+  "voice": "Chris (ElevenLabs)"
+ },
+ {
+  "start": 25.8,
+  "scene_end": 32.1,
+  "text": "Fun one: Claude used Arm's built-in CRC instruction. Two point three times faster.",
+  "voice": "Chris (ElevenLabs)"
+ },
+ {
+  "start": 32.3,
+  "scene_end": 37.6,
+  "text": "Memory? Pretty much the same. Arm just starts a hair lighter.",
+  "voice": "Chris (ElevenLabs)"
+ },
+ {
+  "start": 37.8,
+  "scene_end": 43.4,
+  "text": "The catch? Only nine of thirty-nine x86 answers even compile on Arm.",
+  "voice": "Chris (ElevenLabs)"
+ },
+ {
+  "start": 43.5,
+  "scene_end": 47.0,
+  "text": "It's all open. arch-kernels, on Prime Intellect's Hub.",
+  "voice": "Chris (ElevenLabs)"
+ }
+]
