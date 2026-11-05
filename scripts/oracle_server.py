@@ -5,7 +5,8 @@
   naive  - files the ledger as recorded: sums every sale line and the recorded tax, accrues
            no use tax, flags no faults (an un-audited bookkeeper's return). On gpu-rightsizing-v1
            it keeps every pod at its full request (today's over-reserved fleet): nothing reclaimed. On weight-space-v1
-           it guesses "majority" and lists every unit (read), makes no edit (fix) and writes an all-zero net (write).
+           it guesses "majority" and lists every unit (read), makes no edit (fix) and writes an all-zero net (write). On
+           arch-kernels-v1 the oracle answers with the hand-tuned portable C and naive with the reference's own code.
 
 The environment is detected from the prompt, so one server covers both environments.
 
@@ -86,7 +87,17 @@ def wsp(text: str) -> dict:
             "v": [float(v) for v in net.v], "c": float(net.c)}
 
 
-def respond(text: str) -> dict:
+def kernel(text: str) -> str:
+    from arch_kernels_v1.kernels import KERNELS
+    from arch_kernels_v1.solutions import NAIVE, TUNED
+
+    name = next(k for k, v in KERNELS.items() if v.signature in text)
+    return f"```c\n{(NAIVE if POLICY == 'naive' else TUNED)[name].strip()}\n```"
+
+
+def respond(text: str) -> dict | str:
+    if text.startswith("Implement this function as fast as you can"):
+        return kernel(text)
     if text.startswith(("READ.", "FIX.", "WRITE.")):
         return wsp(text)
     if "Pods (CSV):" in text:
@@ -99,7 +110,8 @@ class Handler(BaseHTTPRequestHandler):
         body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         user = next(m for m in body["messages"] if m["role"] == "user")
         content = user["content"] if isinstance(user["content"], str) else user["content"][0]["text"]
-        answer = f"<answer>\n{json.dumps(respond(content))}\n</answer>"
+        reply = respond(content)
+        answer = f"<answer>\n{reply if isinstance(reply, str) else json.dumps(reply)}\n</answer>"
         created, model = int(time.time()), body.get("model")
         if not body.get("stream"):
             out = {

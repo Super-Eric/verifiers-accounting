@@ -1,0 +1,129 @@
+{
+  "env": {
+    "taskset": {
+      "task": {
+        "judges": [],
+        "stops": {},
+        "metrics": {},
+        "rewards": {}
+      },
+      "system_prompt": null,
+      "id": "arch-kernels-v1",
+      "arch": "amd64",
+      "kernels": [
+        "dot_f32",
+        "prefix_sum_i64",
+        "byte_histogram",
+        "count_primes",
+        "matmul_f32",
+        "sort_u32",
+        "count_substr",
+        "popcount_u64",
+        "count_distinct_u32",
+        "transpose_f32",
+        "crc32_ieee",
+        "levenshtein",
+        "mandel_count"
+      ],
+      "cpu": 2.0,
+      "memory": 4.0
+    },
+    "timeout": {
+      "episode": null,
+      "finalize": null
+    },
+    "retries": {
+      "max_retries": 0,
+      "rules": []
+    },
+    "max_concurrent_agents": 1,
+    "interception": {
+      "type": "elastic",
+      "multiplex": 32
+    },
+    "id": "",
+    "agent": {
+      "harness": {
+        "id": "null",
+        "env": {},
+        "forward_env": [],
+        "mcp_header_env": {},
+        "tool_timeout": 600.0,
+        "disabled_tools": null,
+        "skills": []
+      },
+      "runtime": {
+        "type": "subprocess"
+      },
+      "model": null,
+      "client": null,
+      "sampling": null,
+      "max_turns": null,
+      "max_input_tokens": null,
+      "max_output_tokens": null,
+      "max_total_tokens": null,
+      "timeout": {
+        "setup": null,
+        "rollout": null,
+        "finalize": null,
+        "scoring": null
+      },
+      "retries": {
+        "max_retries": 0,
+        "rules": []
+      },
+      "network_notice": true
+    }
+  },
+  "run": {
+    "name": "arch-kernels-v1--claude-sonnet-5-5--null--fa4495a8",
+    "dir": "arch-kernels-v1--claude-sonnet-5-5--null--fa4495a8",
+    "attach": null
+  },
+  "model": "claude-sonnet-5-5",
+  "client": {
+    "base_url": "https://api.anthropic.com/v1",
+    "api_key_var": "ANTHROPIC_API_KEY",
+    "headers": {},
+    "headers_from_env": {},
+    "timeout": {
+      "connect": 30.0,
+      "read": null,
+      "write": null,
+      "pool": null
+    },
+    "type": "eval"
+  },
+  "sampling": {
+    "temperature": null,
+    "top_p": null,
+    "reasoning_effort": null,
+    "max_tokens": 32000
+  },
+  "select": {
+    "include": {
+      "idx": [],
+      "ids": [],
+      "keys": [],
+      "names": []
+    },
+    "exclude": {
+      "idx": [],
+      "ids": [],
+      "keys": [],
+      "names": []
+    },
+    "shuffle": false,
+    "seed": 0,
+    "skip": 0,
+    "limit": 13
+  },
+  "num_rollouts": 3,
+  "max_concurrent": 8,
+  "verbose": false,
+  "rich": {
+    "show_logs": false
+  },
+  "push": false,
+  "output_dir": "outputs"
+}
