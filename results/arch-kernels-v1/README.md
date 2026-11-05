@@ -32,6 +32,8 @@ sandbox price for both architectures, so throughput per vCPU here is also throug
 ![x86 vs Arm](cards/1_x86_vs_arm.png)
 ![Claude goes native](cards/2_native.png)
 
+A 46-second animated version is in [`film/`](film/index.html) ([MP4](film/arch-kernels.mp4), rendered frame by frame with `scripts/record_film.py`). Posted on X: https://x.com/saksham_adh/status/2118269028343132590
+
 ## Model runs
 
 | run | arch | n | score | passed | correct | compiled | within memory | median speedup (passed) | output tokens / episode |

@@ -1,0 +1,242 @@
+<title>x86 or Arm?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=block">
+<style>
+/* Layout: one 4:5 film stage (1080 x 1350 design px), scaled to fit, controls and a plain-text summary below. One clock drives every scene. */
+:root {
+  --paper: #f3f3ee;        /* stage ground, warm-neutral like a lab notebook */
+  --card: #ffffff;
+  --ink: #17181b;
+  --muted: #8a8c92;
+  --rule: #e2e2dc;
+  --arm: #2a7de1;          /* Arm: the accent */
+  --arm-soft: #e3eefb;
+  --x86: #9a9ca3;          /* x86: neutral */
+  --bad: #d4553f;
+  --page: #e9e9e3;         /* page around the stage */
+  --display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  --body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --page: #1b1c1f; --pageink: #e8e8e4; color-scheme: dark } }
+:root[data-theme="dark"] { --page: #1b1c1f; color-scheme: dark }
+:root { --pageink: #17181b }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --pageink: #e8e8e4 } }
+:root[data-theme="dark"] { --pageink: #e8e8e4 }
+
+html, body { background: var(--page); color: var(--pageink); }
+body { font-family: var(--body); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 40px; }
+.wrap { max-width: 540px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.frame { width: 100%; max-width: 100%; aspect-ratio: 4 / 5; position: relative; overflow: hidden; border-radius: 14px; background: var(--paper); box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 8px 30px rgba(0,0,0,.08); }
+#stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; transform-origin: 0 0; background: var(--paper); color: var(--ink); overflow: hidden; }
+.controls { display: flex; align-items: center; gap: 12px; }
+.controls button { font: 600 14px var(--body); color: var(--pageink); background: transparent; border: 1.5px solid currentColor; border-radius: 999px; padding: 7px 16px; cursor: pointer; opacity: .85; }
+.controls button:focus-visible, .controls input:focus-visible { outline: 2px solid var(--arm); outline-offset: 2px; }
+.controls input { flex: 1; min-width: 0; accent-color: var(--arm); }
+.clock { font: 13px var(--mono); font-variant-numeric: tabular-nums; opacity: .7; width: 44px; text-align: right; }
+.summary { font-size: 15px; line-height: 1.55; max-width: 62ch; }
+.summary h1 { font: 800 22px/1.2 var(--display); margin: 8px 0 6px; text-wrap: balance; }
+.summary ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.summary a { color: var(--arm); }
+.summary .src { font: 12.5px var(--mono); opacity: .65; margin-top: 10px; }
+
+/* ---- stage (design px) ---- */
+.scene { position: absolute; inset: 0; padding: 110px 96px; display: flex; flex-direction: column; justify-content: center; }
+.big { font: 800 260px/0.92 var(--display); letter-spacing: -8px; color: var(--arm); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.head { font: 800 72px/1.05 var(--display); letter-spacing: -1.5px; text-wrap: balance; }
+.sub { font: 400 27px/1.5 var(--mono); color: var(--muted); margin-top: 26px; }
+.title { font: 800 150px/1 var(--display); letter-spacing: -5px; }
+.title b { color: var(--arm); font-weight: 800; }
+.card { background: var(--card); border-radius: 30px; padding: 48px 50px; box-shadow: 0 2px 6px rgba(0,0,0,.05), 0 20px 60px rgba(0,0,0,.06); }
+.card .top { display: flex; justify-content: space-between; align-items: center; font: 600 34px var(--body); }
+.chip { font: 500 22px var(--mono); border: 2px solid var(--rule); color: var(--muted); border-radius: 999px; padding: 6px 16px; }
+.kv { display: flex; justify-content: space-between; align-items: baseline; padding: 24px 0; border-bottom: 2px solid var(--rule); font: 400 31px var(--body); color: var(--muted); }
+.kv span:last-child { font: 500 31px var(--mono); color: var(--ink); }
+.code { margin-top: 30px; background: #f6f7f9; border-radius: 16px; padding: 26px 30px; font: 400 25px/1.6 var(--mono); color: #3a3d44; height: 250px; white-space: pre; overflow: hidden; }
+.code .k { color: var(--arm); }
+.foot { font: 400 21px var(--mono); color: var(--muted); margin-top: 26px; }
+.row { display: flex; align-items: center; gap: 24px; font: 500 31px var(--body); }
+.bar { height: 62px; border-radius: 6px; }
+.lab { width: 160px; flex: none; }
+.val { font: 500 31px var(--mono); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .controls #play { display: none; } }
+</style>
+
+<div class="wrap">
+  <div class="frame" id="frame"><div id="stage"></div></div>
+  <div class="controls">
+    <button id="play" type="button">Pause</button>
+    <button id="replay" type="button">Replay</button>
+    <input id="scrub" type="range" min="0" max="46" step="0.05" value="0" aria-label="Position in the film">
+    <span class="clock" id="clock">0:00</span>
+  </div>
+  <section class="summary">
+    <h1>Same C on x86 and Arm: which is faster?</h1>
+    <ul>
+      <li>Claude Haiku 5.5 and Sonnet 5.5 wrote fast C for 13 kernels. Every answer was built and timed on an AMD EPYC 9255 (x86) and an NVIDIA Olympus (Arm) sandbox, 2 vCPUs each.</li>
+      <li>Throughput is a tie overall: Arm is faster on 6 of 13 kernels (geometric mean 0.97×). x86 wins wide-SIMD work like matmul; Arm wins CRC-32 by 2.3× with its own CRC instruction.</li>
+      <li>Memory is the same: identical data sizes, and every Arm process peaks about 0.34 MB lower.</li>
+      <li>Told the chip, Claude writes chip-specific code: only 9 of Sonnet's 39 x86 answers compile on Arm.</li>
+    </ul>
+    <p class="src">Env: <a href="https://app.primeintellect.ai/dashboard/environments/tarive/arch-kernels-v1">tarive/arch-kernels-v1</a> · code and data: <a href="https://github.com/Tar-ive/verifiers/tree/claude/magical-carson-uwfmp0/results/arch-kernels-v1">github.com/Tar-ive/verifiers</a></p>
+  </section>
+</div>
+
+<script>
+const DATA = {"ratios": [["distinct", 0.506], ["matmul", 0.523], ["mandelbrot", 0.588], ["histogram", 0.595], ["substring", 0.684], ["popcount", 0.819], ["edit distance", 0.939], ["prefix sum", 1.04], ["sort", 1.123], ["dot product", 1.244], ["transpose", 1.582], ["CRC-32", 2.339], ["prime count", 2.689]], "crc": {"arm64": 0.4195, "amd64": 0.98137}, "memdiff_mb": -0.34, "port": [9, 39], "geo": 0.97, "armwins": 6,
+  "scores": {"Haiku 5.5": [0.81, 0.85], "Sonnet 5.5": [0.91, 0.89]}};
+const DUR = 46;
+const stage = document.getElementById('stage');
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = p => { p = clamp(p); return p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; };
+const out = p => 1 - Math.pow(1 - clamp(p), 3);
+// fade window: in over 0.5 s from a, out over 0.5 s ending at b
+const win = (t, a, b) => Math.min(out((t - a) / 0.5), out((b - t) / 0.5));
+const rise = (t, a, d = 0.6) => `translateY(${(1 - out((t - a) / d)) * 40}px)`;
+
+const CODE = {
+  amd64: ['<span class="k">#include</span> &lt;immintrin.h&gt;', '', 'uint32_t crc32_ieee(const uint8_t *p, size_t n) {', '  __m128i k = _mm_set_epi64x(0x1c6e41596,', '                             0x154442bd4);', '  x = _mm_clmulepi64_si128(x, k, 0x00);', '  ...'],
+  arm64: ['<span class="k">#include</span> &lt;arm_acle.h&gt;', '', 'uint32_t crc32_ieee(const uint8_t *p, size_t n) {', '  for (; n >= 8; n -= 8, p += 8)', '    c = <span class="k">__crc32d</span>(c, load64(p));', '  while (n--) c = <span class="k">__crc32b</span>(c, *p++);', '  ...'],
+};
+const MACH = {
+  amd64: { name: 'amd64', cpu: 'AMD EPYC 9255', simd: 'AVX-512' },
+  arm64: { name: 'arm64', cpu: 'NVIDIA Olympus', simd: 'SVE2 + CRC32' },
+};
+
+function typed(lines, p) {
+  const total = lines.join('\n').replace(/<[^>]+>/g, '').length;
+  let budget = Math.floor(total * clamp(p)), html = [];
+  for (const l of lines) {
+    const plain = l.replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    if (budget >= plain.length) { html.push(l); budget -= plain.length + 1; continue; }
+    if (budget > 0) html.push(plain.slice(0, budget).replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+    break;
+  }
+  return html.join('\n');
+}
+
+const scenes = [
+  // 0-4.5 title
+  [0, 4.6, (t) => `<div class="scene" style="opacity:${win(t, -1, 4.6)}">
+      <div class="title" style="transform:${rise(t, 0.1)}">x86 <span style="color:var(--muted);font-weight:500">or</span> <b>Arm</b>?</div>
+      <div class="sub" style="opacity:${out((t - 0.8) / 0.6)}">same C · two chips · real sandboxes<br>arch-kernels-v1 · an RL environment</div></div>`],
+  // 4.5-12.5 machine card, flips amd64 -> arm64
+  [4.4, 12.6, (t) => {
+    const m = t < 8.5 ? MACH.amd64 : MACH.arm64, local = t < 8.5 ? t - 4.6 : t - 8.6;
+    const flip = t < 8.5 ? 1 : out((t - 8.5) / 0.4);
+    const arm = m.name === 'arm64';
+    return `<div class="scene" style="opacity:${win(t, 4.4, 12.6)}">
+      <div class="card" style="transform:${rise(t, 4.5)} scale(${0.97 + 0.03 * flip})">
+        <div class="top"><span>Sandbox · ${m.name} <span style="color:var(--muted)">⌄</span></span><span class="chip" style="${arm ? 'border-color:var(--arm);color:var(--arm)' : ''}">2 vCPU</span></div>
+        <div class="kv"><span>CPU</span><span style="${arm ? 'color:var(--arm)' : ''}">${m.cpu}</span></div>
+        <div class="kv"><span>Vector units</span><span>${m.simd}</span></div>
+        <div class="kv"><span>Build</span><span>gcc 14.2 -O3 -march=native</span></div>
+        <div class="code">${typed(CODE[m.name], (local - 0.6) / 2.6)}</div>
+        <div class="foot">Claude writes the C · the sandbox builds and times it</div>
+      </div></div>`;
+  }],
+  // 12.5-18.5 big number: arm wins 6/13
+  [12.5, 18.6, (t) => {
+    const n = Math.round(DATA.armwins * ease((t - 12.8) / 1.3));
+    return `<div class="scene" style="opacity:${win(t, 12.5, 18.6)}">
+      <div class="big">${n}<span style="color:var(--ink)"> / 13</span></div>
+      <div class="head" style="margin-top:34px;opacity:${out((t - 14) / 0.6)};transform:${rise(t, 14)}">kernels run faster on Arm. That's a tie.</div>
+      <div class="sub" style="opacity:${out((t - 14.8) / 0.6)}">Claude's fastest answer per kernel, timed on both chips · geomean ${DATA.geo}×</div></div>`;
+  }],
+  // 18.5-25.5 diverging bars
+  [18.5, 25.6, (t) => {
+    const mid = 470, half = 380, rh = 58;
+    const rows = DATA.ratios.map(([name, r], i) => {
+      const g = ease((t - 19.2 - i * 0.12) / 0.8);
+      const L = clamp(Math.log(r) / Math.log(3), -1, 1) * half * g;
+      const arm = r > 1, y = i * rh;
+      const x = arm ? mid : mid + L, w = Math.max(Math.abs(L), 3);
+      const txt = arm ? `<text x="${mid - 16}" y="${y + 37}" text-anchor="end">${name}</text>` : `<text x="${mid + 16}" y="${y + 37}">${name}</text>`;
+      const v = g > 0.95 ? `<text x="${arm ? mid + L + 12 : mid + L - 12}" y="${y + 37}" text-anchor="${arm ? 'start' : 'end'}" class="v">${(arm ? r : 1 / r).toFixed(1)}×</text>` : '';
+      return `<rect x="${x}" y="${y + 10}" width="${w}" height="${rh - 18}" rx="5" fill="${arm ? 'var(--arm)' : 'var(--x86)'}"/>${txt}${v}`;
+    }).join('');
+    return `<div class="scene" style="opacity:${win(t, 18.5, 25.6)};justify-content:flex-start;padding-top:96px">
+      <div class="head" style="transform:${rise(t, 18.6)}">Neither chip wins everywhere.</div>
+      <div class="sub" style="margin-top:14px">same C on both · time ratio, log scale</div>
+      <svg width="888" height="${13 * rh + 70}" viewBox="0 0 888 ${13 * rh + 70}" style="margin-top:34px;font:400 26px var(--body);fill:var(--ink)">
+        <style>.v{font:500 24px var(--mono);fill:var(--muted)}</style>
+        <line x1="${mid}" y1="0" x2="${mid}" y2="${13 * rh}" stroke="#c9c9c2" stroke-width="2"/>${rows}
+        <text x="${mid - 24}" y="${13 * rh + 52}" text-anchor="end" style="font:500 24px var(--mono);fill:var(--muted)">◀ x86 faster</text>
+        <text x="${mid + 24}" y="${13 * rh + 52}" style="font:500 24px var(--mono);fill:var(--arm)">Arm faster ▶</text>
+      </svg></div>`;
+  }],
+  // 25.5-32 CRC
+  [25.5, 32.1, (t) => {
+    const g = ease((t - 27.6) / 1.0), max = DATA.crc.amd64;
+    const bar = (lab, code, ms, col) => `<div class="row" style="margin-top:30px"><span class="lab">${lab}</span>
+        <div style="flex:1;min-width:0"><div class="bar" style="width:${(ms / max) * 100 * g}%;background:${col}"></div>
+        <div style="font:400 24px var(--mono);color:var(--muted);margin-top:10px">${code}</div></div>
+        <span class="val" style="width:150px;text-align:right;opacity:${g}">${ms.toFixed(2)} ms</span></div>`;
+    const sp = (DATA.crc.amd64 / DATA.crc.arm64) * ease((t - 25.8) / 1.2);
+    return `<div class="scene" style="opacity:${win(t, 25.5, 32.1)}">
+      <div class="big">${sp.toFixed(1)}×</div>
+      <div class="head" style="margin-top:30px;opacity:${out((t - 26.8) / 0.6)}">faster CRC-32 on Arm. Claude used the chip's own CRC instruction.</div>
+      <div style="margin-top:40px">${bar('Arm', '__crc32d(c, word)', DATA.crc.arm64, 'var(--arm)')}${bar('x86', '_mm_clmulepi64_si128', DATA.crc.amd64, 'var(--x86)')}</div>
+      <div class="sub" style="font-size:22px">16 MiB · best answer per chip · reference: 126–129 ms on both</div></div>`;
+  }],
+  // 32-37.5 memory
+  [32, 37.6, (t) => {
+    const v = DATA.memdiff_mb * ease((t - 32.3) / 1.0);
+    return `<div class="scene" style="opacity:${win(t, 32, 37.6)}">
+      <div class="big" style="color:var(--ink)">${v.toFixed(2).replace('-', '−')}<span style="font-size:130px;letter-spacing:-3px"> MB</span></div>
+      <div class="head" style="margin-top:34px;opacity:${out((t - 33.4) / 0.6)}">Memory: a tie. Same bytes, Arm processes just start lighter.</div>
+      <div class="sub" style="opacity:${out((t - 34.2) / 0.6)}">peak RSS, Arm − x86 · the same on all 13 kernels, from 0.6 MB to 394 MB</div></div>`;
+  }],
+  // 37.5-42.5 portability grid
+  [37.5, 42.6, (t) => {
+    const [ok, n] = DATA.port, shown = Math.floor(n * ease((t - 38.4) / 1.6));
+    let cells = '';
+    for (let i = 0; i < n; i++) {
+      const x = (i % 13) * 66, y = Math.floor(i / 13) * 66, on = i < shown;
+      cells += `<rect x="${x}" y="${y}" width="54" height="54" rx="8" fill="${!on ? '#e6e6e0' : i < ok ? 'var(--arm)' : 'url(#h)'}" ${on && i >= ok ? 'stroke="var(--bad)" stroke-opacity=".5" stroke-width="2"' : ''}/>`;
+    }
+    const c = Math.min(ok, shown);
+    return `<div class="scene" style="opacity:${win(t, 37.5, 42.6)}">
+      <div class="big">${c}<span style="color:var(--ink)"> / ${n}</span></div>
+      <div class="head" style="margin-top:30px;opacity:${out((t - 38.2) / 0.6)}">of Sonnet's x86 answers even compile on Arm.</div>
+      <svg width="858" height="200" viewBox="0 0 858 200" style="margin-top:44px">
+        <defs><pattern id="h" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="12" height="12" fill="#fbecea"/><line x1="0" y1="0" x2="0" y2="12" stroke="var(--bad)" stroke-width="4" opacity=".55"/></pattern></defs>${cells}</svg>
+      <div class="sub">told the target chip, Claude writes chip-specific intrinsics</div></div>`;
+  }],
+  // 42.5-46 end card
+  [42.5, 47, (t) => {
+    const s = Object.entries(DATA.scores).map(([m, [x, a]]) => `<div class="kv" style="color:var(--ink)"><span>${m}</span><span><span style="color:var(--muted)">x86</span> ${x.toFixed(2)} · <span style="color:var(--arm)">Arm ${a.toFixed(2)}</span></span></div>`).join('');
+    return `<div class="scene" style="opacity:${out((t - 42.5) / 0.5)}">
+      <div class="title" style="font-size:120px">arch<b>kernels</b></div>
+      <div class="sub" style="margin-top:14px">13 C kernels · correctness, speedup, peak memory</div>
+      <div class="card" style="margin-top:50px;transform:${rise(t, 43)}"><div class="top" style="margin-bottom:6px"><span>Score</span><span class="chip">1 = correct and 8× faster</span></div>${s}</div>
+      <div class="sub" style="font-size:24px">tarive/arch-kernels-v1 · Prime Intellect Environments Hub</div></div>`;
+  }],
+];
+
+function render(t) {
+  stage.innerHTML = scenes.filter(([a, b]) => t >= a && t < b).map(([, , f]) => f(t)).join('');
+}
+
+// ---- playback ----
+const frame = document.getElementById('frame'), scrub = document.getElementById('scrub'),
+      clock = document.getElementById('clock'), playBtn = document.getElementById('play');
+function fit() { stage.style.transform = `scale(${frame.clientWidth / 1080})`; }
+new ResizeObserver(fit).observe(frame); fit();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let t = 0, playing = !reduce, last = null;
+function show(x) { t = clamp(x, 0, DUR); render(t); scrub.value = t; clock.textContent = `0:${String(Math.floor(t)).padStart(2, '0')}`; }
+function tick(now) {
+  if (playing && last !== null) { show(t + (now - last) / 1000); if (t >= DUR) { playing = false; playBtn.textContent = 'Play'; } }
+  last = now; requestAnimationFrame(tick);
+}
+playBtn.onclick = () => { if (t >= DUR) show(0); playing = !playing; playBtn.textContent = playing ? 'Pause' : 'Play'; };
+document.getElementById('replay').onclick = () => { show(0); playing = true; playBtn.textContent = 'Pause'; };
+scrub.oninput = () => { playing = false; playBtn.textContent = 'Play'; show(+scrub.value); };
+show(reduce ? 13.5 : 0);
+if (!reduce) playBtn.textContent = 'Pause'; else playBtn.textContent = 'Play';
+requestAnimationFrame(tick);
+// recorder hook: render one exact frame at the stage's native size
+window.__frame = (x) => { playing = false; frame.style.cssText = 'width:1080px;height:1350px;max-width:none;border-radius:0;box-shadow:none'; stage.style.transform = 'none'; render(x); };
+</script>
